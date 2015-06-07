@@ -1,0 +1,6 @@
+/api/server/getField - получение поля в json (x,y,имя)
+/api/server/getPlayers - получение списка игроков
+/api/server/makeTurn/name/x/y/ - попытка хода, ответы: no_winner (успешно), busy (клетка занята), not_your_turn, end_game
+/api/server/leave/name - выход
+/api/server/getWinner - победитель
+/api/server/join/name - подключиться к игре
