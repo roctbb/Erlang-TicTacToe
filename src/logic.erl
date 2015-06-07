@@ -45,7 +45,7 @@ firstElement([X|_]) ->
   X;
 firstElement([]) ->
   [].
-deleteFirst([H|T]) ->
+deleteFirst([_|T]) ->
   T;
 deleteFirst([])->[].
 
