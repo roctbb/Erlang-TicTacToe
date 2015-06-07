@@ -149,9 +149,8 @@ leave_game(Name,State) ->
   Waiting = State#situation.waitingPlayers,
   Playing = State#situation.playing,
   Bool = lists:member(Name,Playing),
-  if Bool == true -> State#situation {playing = lists:delete(Name,Playing)},
-    State#situation {playing = lists:append(firstElement(Waiting),Playing)},
-    State#situation {waitingPlayers = deleteFirst(Waiting)};
+  if Bool == true ->
+    State#situation {playing = lists:append(firstElement(Waiting),lists:delete(Name,Playing)), waitingPlayers = deleteFirst(Waiting)};
     Bool == false -> State#situation {waitingPlayers = lists:delete(Name,Waiting)}
   end
 .
