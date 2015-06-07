@@ -70,7 +70,7 @@ makeTurn(X,Y,PlayerName,State) ->
     Won /= Name ->
       New_playing = firstElement(State#situation.waitingPlayers),
       New_waitingPlayers = deleteFirst(State#situation.waitingPlayers),
-      New = lists:append([Name],New_waitingPlayers),
+      New = New_waitingPlayers++[Name],
       {no_winner,State#situation{waitingPlayers = New, playing = [New_playing], field = Field}}
   end.
 
@@ -86,13 +86,11 @@ checkLine(X,Y,Name,Field,N) ->
   Ver = checkLine(X,Y,Name,Field,up,N) - checkLine(X,Y,Name,Field,down,N) - 1,
   Diag_up = checkLine(X,Y,Name,Field,right_up,N) - checkLine(X,Y,Name,Field,left_down,N) - 1,
   Diag_down =  checkLine(X,Y,Name,Field,right_down,N) - checkLine(X,Y,Name,Field,left_up,N) - 1,
-if ((Hor >= N) or (Ver >= N) or (Diag_up >= N) or (Diag_down >= N)) -> true;
-  true -> false
-end.
+  if ((Hor >= N) or (Ver >= N) or (Diag_up >= N) or (Diag_down >= N)) -> true;
+    true -> false
+  end.
 
 checkLine(X,Y,Name,Field,Dir,N) ->
-  A = dict:find({X,Y},Field),
-  io:write(A),
   case Dir of
     right ->
       case dict:find({X,Y},Field) of {ok, [Name]} -> checkLine(X+1,Y,Name,Field,Dir,N);
@@ -137,11 +135,11 @@ addPlayer(Name, State) ->
   Players = State#situation.playing ++ State#situation.waitingPlayers,
   Bool_c = lists:member(Name,Players),
   if Bool_c == true -> {not_ok, State};
-     Bool_c /= true ->
-       if Playing == [] ->
-         {ok, State#situation{playing = [Name]}};
-         Players /= [] -> {ok, State#situation{waitingPlayers = State#situation.waitingPlayers ++ [Name]}}
-         end
+    Bool_c /= true ->
+      if Playing == [] ->
+        {ok, State#situation{playing = [Name]}};
+        Players /= [] -> {ok, State#situation{waitingPlayers = State#situation.waitingPlayers ++ [Name]}}
+      end
   end
 .
 
@@ -150,7 +148,7 @@ leave_game(Name,State) ->
   Playing = State#situation.playing,
   Bool = lists:member(Name,Playing),
   if Bool == true ->
-    State#situation {playing = lists:append(firstElement(Waiting),lists:delete(Name,Playing)), waitingPlayers = deleteFirst(Waiting)};
+    State#situation {playing = [lists:append(firstElement(Waiting),lists:delete(Name,Playing))], waitingPlayers = deleteFirst(Waiting)};
     Bool == false -> State#situation {waitingPlayers = lists:delete(Name,Waiting)}
   end
 .
