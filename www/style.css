@@ -1,0 +1,48 @@
+table {
+    position: absolute;
+    width: 100%;
+    overflow-y: scroll;
+
+}
+thead tr td {
+    font-weight: bold;
+}
+h1 {
+    text-align:center;
+}
+
+#field {
+    border: 1px solid black;
+    display: block;
+    position: fixed;
+    overflow-x: scroll;
+    overflow-y: scroll;
+    width:580px;
+    height:580px;
+}
+
+.cell {
+    width:40px;
+    height:40px;
+    font-size:30px;
+    display: block;
+    position:absolute;
+    border:1px solid lightgray;
+    background:whitesmoke;
+}
+
+#block{
+    border: 1px solid black;
+    padding: 5px;
+    min-width:280px;
+    width:290px;
+    min_height:300px;
+
+}
+
+
+
+#table {
+   border: 2px solid black;
+
+}
