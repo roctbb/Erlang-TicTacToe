@@ -1,16 +1,20 @@
 -module(logic).
+-define(DB_FILENAME, "data\\file.tab").
 -author("roctbb").
 -behaviour(gen_server).
 -export([terminate/2,init/1, start_link/0, handle_call/3, handle_cast/2]).
--export([checkTurn/4, getWinner/1, addPlayer/2,getPlayers/1, verifyCell/3,start_game/0,leave_game/2 ]).
+-export([checkTurn/4, getWinner/1, addPlayer/2,getPlayers/1, verifyCell/3,start_game/0,leave_game/2, handle_info/2, code_change/3 ]).
 -record(situation, {waitingPlayers=[], playing=[], winner=no, field = dict:new()}).
 %%% Реализация процесса игровой логики
 %%%   start_link – запуск процесса
 %%%   init – создание начального состояния
 %%%   handle_call – обработка сообщений, которые требуют ответ
 %%%   handle_cast – обработка сообщений, которые не требуют ответs
+
+
+
 start_link() -> gen_server:start_link({global, logic}, ?MODULE, [], []).
-init([]) -> { ok, logic:start_game() }.
+init([]) ->{ ok, logic:start_game() }.
 handle_call( {getPlayers} , _, State) -> { reply, getPlayers(State), State } ;
 handle_call( {getWinner} , _, State) -> {reply, getWinner(State), State};
 handle_call( {verifyCell, X, Y}, _, State) -> {reply, verifyCell(X, Y, State), State};
@@ -22,7 +26,7 @@ handle_call( {join, Name}, _, State) ->
   {Status, NewState} = addPlayer(Name, State),
   {reply, Status, NewState}.
 handle_cast( {reset}, _ ) -> {noreply, #situation{}};
-handle_cast( {leave, Name}, State) -> {noreply, leave_game(Name, State)}.
+handle_cast( {leave, Name}, State) ->  {noreply, leave_game(Name, State)}.
 
 checkTurn(X,Y,PlayerName,State) ->
   IsPlaying = lists:member(PlayerName,State#situation.playing),
@@ -46,7 +50,7 @@ deleteFirst([H|T]) ->
 deleteFirst([])->[].
 
 getPlayers(State) ->
-  Players = State#situation.playing ++ State#situation.waitingPlayers.
+  State#situation.playing ++ State#situation.waitingPlayers.
 
 getWinner(State) -> State#situation.winner.
 
@@ -82,7 +86,7 @@ checkLine(X,Y,Name,Field,N) ->
   Ver = checkLine(X,Y,Name,Field,up,N) - checkLine(X,Y,Name,Field,down,N) - 1,
   Diag_up = checkLine(X,Y,Name,Field,right_up,N) - checkLine(X,Y,Name,Field,left_down,N) - 1,
   Diag_down =  checkLine(X,Y,Name,Field,right_down,N) - checkLine(X,Y,Name,Field,left_up,N) - 1,
-if ((Hor == N) or (Ver == N) or (Diag_up == N) or (Diag_down == N)) -> true;
+if ((Hor >= N) or (Ver >= N) or (Diag_up >= N) or (Diag_down >= N)) -> true;
   true -> false
 end.
 
@@ -157,3 +161,5 @@ start_game() -> #situation{}
 .
 
 terminate(_Reason, _State) -> ok.
+handle_info(_Info, State) -> {noreply, State}.
+code_change(_OldVsn, State, _Extra) -> {ok, State}.
