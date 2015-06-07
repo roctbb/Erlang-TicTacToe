@@ -57,7 +57,7 @@ getWinner(SessionId,_,_) ->
   case Winner of
     nobody ->
       WinnerJSON = "nobody";
-    _ -> WinnerJSON = io_lib:format("{\"~s\"}", [Winner])
+    _ -> WinnerJSON = io_lib:format("{\"winner\":\"~s\"}", [Winner])
   end,
   mod_esi:deliver(SessionId, ct_string(json) ++ WinnerJSON).
 
