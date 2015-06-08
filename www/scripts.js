@@ -92,7 +92,7 @@ $(document).ready(function() {
 
     function update_players() {
         var list_html = $("#list");
-        //list_html.html("<li>sad<li>");
+
         $.ajax({
             url: prefix + "getPlayers",
             dataType: "json"
@@ -168,31 +168,6 @@ $(document).ready(function() {
             }
         });
     }
-    function update_winner() {
-        $.ajax({
-            url: prefix + "getWinner",
-            dataType: "json"
-        }).done(function(data) {
-            var Name = $("#name").val();
-
-            if (data.winner == Name && rep == 1){
-                rep=0;
-                alert("Поздравляем! Вы победили.")
-            }
-            else if (data.winner != "no" && rep == 1) {
-                rep=0;
-                alert("Вы проиграли( Победил: " + data.winner);
-            }
-
-        });
-    }
-
-$(".cell").click(function(){
-        var Name = $("#name").val();
-        var X = $(this).attr("X");
-        var Y = $(this).attr("Y");
-        make_turn(Name,X,Y);
-    });
 
     function make_turn(Name,X,Y)
     {
@@ -219,16 +194,32 @@ $(".cell").click(function(){
            }
         });
     }
-
-    function reset(){
+    function update_winner() {
         $.ajax({
-            erl: prefix + "reset",
-            dataType: "text"
-        }).done(function(data){
-            if (data == "ok")
-            {
+            url: prefix + "getWinner",
+            dataType: "json"
+        }).done(function(data) {
+            var Name = $("#name").val();
 
+            if (data.winner == Name && rep == 1){
+                rep=0;
+                alert("Поздравляем! Вы победили.")
             }
+            else if (data.winner != "no" && rep == 1) {
+                rep=0;
+                alert("Вы проиграли( Победил: " + data.winner);
+            }
+
         });
     }
+
+$(".cell").click(function(){
+        var Name = $("#name").val();
+        var X = $(this).attr("X");
+        var Y = $(this).attr("Y");
+        make_turn(Name,X,Y);
+    });
+
+
+
 })
