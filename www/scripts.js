@@ -1,39 +1,37 @@
  var prefix = "/api/server/";
 const W=100;
 const H=100;
-const CellSize=40;
+const cSize=40;
 var rep = 1;
-var mas_sym =["X", "O", "A", "*", "~", "V", "#", "@", ">", "<"];
+var symbols =["X", "O", "%", "*", "~", "V", "#", "@", ">", "<"];
+
 $(document).ready(function() {
-    var mas_player = [];
-    create_field();
-    setInterval(update_players,1000);
-    setInterval(update_field,1000);
-    setInterval(update_winner,1000);
+    var players = [];
+    makeField();
+    setInterval(updatePlayers,1000);
+    setInterval(updateField,1000);
+    setInterval(getWinner,1000);
 
 
-    function create_field() {
+    function makeField() {
         var field = $('#field');
         field.html();
-        var offset_l = field.offset();
 
-        doc_w = $(document).width();
-        doc_h = $(document).height();
         for (var x = 0; x <= H; x++)
         {
             for (var y = 0; y <= W; y++)
             {
-                var o=CellSize*x;
-                var n=CellSize*y;
-                var st = "<div class='cell' X='%1' Y='%2' style='top:%3px; left:%4px; width:%5px; height:%6px;' >".replace("%1",y).replace("%2",x).replace("%3",o).replace("%4",n).replace("%5",CellSize).replace("%6",CellSize);
+                var o=cSize*x;
+                var n=cSize*y;
+                var t = "<div class='cell' X='%1' Y='%2' style='top:%3px; left:%4px; width:%5px; height:%6px;' >".replace("%1",y).replace("%2",x).replace("%3",o).replace("%4",n).replace("%5",cSize).replace("%6",cSize);
 
-                field.append(st);
+                field.append(t);
             }
         }
 
     }
 
-    function join() {
+    function login() {
         var Name = $("#name").val();
         var inp = $("#name");
         if (Name.length > 0) {
@@ -42,37 +40,36 @@ $(document).ready(function() {
             dataType: "text"
             }).done(function (str) {
             if ("ok" == str) {
-                $("#button").attr("status","leave");
+                $("#button").attr("status","logout");
                 inp.attr('disabled',true);
-                $("#button").removeClass("btn-primary").addClass("btn-danger").text("Выйти из игры");
+                $("#button").text("logout");
             }
             else if (str == "not_ok")
-                alert("Введите другое имя. Игрок с таким именем уже существует(");
-
+                alert("this name already exists. enter another name.");
 
             });
 
         }
         else
-            alert("Введите имя");
+            alert("enter a name");
 
     }
 
 
 
-    function leave() {
+    function logout() {
         var inp = $("#name");
         var Name = $("#name").val();
         if (Name.length > 0) {
             $.ajax({
-                url: prefix + "leave/" + Name,
+                url: prefix + "logout/" + Name,
                 dataType:"text"
             }).done(function(str){
                 if (str == "ok"){
-                    $("#button").attr("status","join");
+                    $("#button").attr("status","login");
                     inp.val("");
                     inp.attr("disabled", false);
-                    $("#button").removeClass("btn-danger").addClass("btn-primary").text("Присоединиться к игре");
+                    $("#button").text("login");
                 }
             });
         }
@@ -82,75 +79,75 @@ $(document).ready(function() {
     $("#button").click(function(){
         var inp = $("#name");
         var status = $(this).attr("status");
-        if (status == "join") {
-            join();
+
+        if (status == "login") {
+
+            login();
         }
         else {
-            leave();
+            logout();
         }
     });
 
-    function update_players() {
+    function updatePlayers() {
         var list_html = $("#list");
 
         $.ajax({
             url: prefix + "getPlayers",
             dataType: "json"
         }).done(function(data) {
-            var players_list = data.players;
+            var pl_list = data.players;
 
             var tag_html = "";
 
-            for (var i = 0; i < players_list.length; i++)
+            for (var i = 0; i < pl_list.length; i++)
             {
+                var c_p = pl_list[i];
+                var c_s = currentSymbol(i);
+                if(hasPlayer(c_p)!=1)
+                    players.push({symbol:c_s,name:c_p});
 
-                var one_player = players_list[i];
-
-                var symbol_c = CurrentSymbol(i);
-                if(hasPlayer(one_player)!=1)
-                    mas_player.push({symbol:symbol_c,name:one_player});
-
-                tag_html = tag_html +   "<li>"  + mas_player[i].name + ": " + mas_player[i].symbol+  "</li>";
+                tag_html = tag_html +   "<li>"  + players[i].name + ": " + players[i].symbol+  "</li>";
             }
             list_html.html(tag_html);
         });
     }
     function hasPlayer(name){
-         for (var i = 0; i < mas_player.length; i++)
+         for (var i = 0; i < players.length; i++)
          {
 
-              if (mas_player[i].name == name) {
+              if (players[i].name == name) {
                     return 1;
               }
          }
          return 0;
     }
-    function playerSymbol(Name)
+    function makeSymbol(name)
     {
 
 
-        for (var i = 0; i < mas_player.length; i++)
+        for (var i = 0; i < players.length; i++)
         {
-            if (mas_player[i].name == Name) {
+            if (players[i].name == name) {
 
 
-                return mas_player[i].symbol;
+                return players[i].symbol;
             }
         }
         return "";
     }
 
-    function CurrentSymbol(ind){
+    function currentSymbol(ind){
 
-        if (ind < mas_sym.length){
-            return mas_sym[ind];
+        if (ind < symbols.length){
+            return symbols[ind];
         }
         else {
             return "" + 1;
         }
     }
 
-    function update_field() {
+    function updateField() {
         $.ajax({
             url: prefix + "getField",
             dataType: "json"
@@ -159,55 +156,55 @@ $(document).ready(function() {
             for (var i = 0; i < field.length; i++)
             {
                 var cell = field[i];
-                var symbol = playerSymbol(cell.player);
+                var symbol = makeSymbol(cell.player);
 
                 var l=".cell[x='"+cell.x+"'][y='"+cell.y+"']";
                 $(l).text(symbol)
-
-
             }
         });
     }
 
-    function make_turn(Name,X,Y)
+    function playerTurn(name,X,Y)
     {
         $.ajax({
-            url: prefix + "makeTurn" +"/" + Name + "/" + X + "/" + Y,
+            url: prefix + "makeTurn" +"/" + name + "/" + X + "/" + Y,
             dataType: "text"
         }).done(function(data){
-
            if (data == "end_game") {
-            update_field();
-            alert("Конец игры!");
+            updateField();
+
+
 
            }
            else if (data == "no_winner"){
-                update_field();
+                updateField();
            }
            else if (data == "not_your_turn")
            {
-                alert("Сейчас не ваш ход!");
+                alert("not your turn!");
            }
            else if (data == "busy")
            {
-                alert("Данная клетка занята, выберите другую клетку");
+                alert("this cell is busy, choose another one");
            }
         });
     }
-    function update_winner() {
+    function getWinner() {
         $.ajax({
             url: prefix + "getWinner",
             dataType: "json"
         }).done(function(data) {
-            var Name = $("#name").val();
+            var name = $("#name").val();
 
-            if (data.winner == Name && rep == 1){
+            if (data.winner == name && rep == 1){
                 rep=0;
-                alert("Поздравляем! Вы победили.")
+                alert("you win!!!")
+
             }
             else if (data.winner != "no" && rep == 1) {
                 rep=0;
-                alert("Вы проиграли( Победил: " + data.winner);
+                alert("you lose:с winner: " + data.winner);
+
             }
 
         });
@@ -217,9 +214,7 @@ $(".cell").click(function(){
         var Name = $("#name").val();
         var X = $(this).attr("X");
         var Y = $(this).attr("Y");
-        make_turn(Name,X,Y);
+        playerTurn(Name,X,Y);
     });
-
-
 
 })
